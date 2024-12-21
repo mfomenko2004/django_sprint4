@@ -10,6 +10,7 @@ from .models import Comment, User
 from django.utils import timezone
 from django.db.models import Count
 
+
 POSTS_PER_PAGE = 10
 
 
@@ -38,14 +39,6 @@ class IndexListView(ListView):
     def get_queryset(self):
         return filter_posts(Post.objects)
 
-# def index(request):
-#     template = 'blog/index.html'
-
-#     posts = Post.objects.published().order_by('-pub_date')[:5]
-
-#     context = {'post_list': posts}
-#     return render(request, template, context)
-
 
 class PostDetailView(DetailView):
     model = Post
@@ -68,18 +61,6 @@ class PostDetailView(DetailView):
             form=CommentForm(),
             comments=self.object.comments.select_related('author'),
         )
-
-
-# def post_detail(request, id):
-#     template = 'blog/detail.html'
-
-#     post = get_object_or_404(
-#         Post.objects.published(),
-#         id=id
-#     )
-
-#     context = {'post': post}
-#     return render(request, template, context)
 
 
 class CategoryListView(ListView):
@@ -109,25 +90,6 @@ class CategoryListView(ListView):
         return context
 
 
-# def category_posts(request, category_slug):
-#     template = 'blog/category.html'
-
-#     category = get_object_or_404(
-#         Category,
-#         slug=category_slug,
-#         is_published=True
-#     )
-#     posts = Post.objects.published().filter(
-#         category=category
-#     ).order_by('-pub_date')
-
-#     context = {
-#         'category': category,
-#         'post_list': posts
-#     }
-#     return render(request, template, context)
-
-
 class ProfileListView(ListView):
     model = Post
     template_name = 'blog/profile.html'
@@ -140,7 +102,7 @@ class ProfileListView(ListView):
     def get_queryset(self):
         return filter_posts(
             self.get_user().posts,
-            filter_flag=(self.request.user != self.get_user())
+            (self.request.user != self.get_user())
         )
 
     def get_context_data(self, **kwargs):
@@ -221,29 +183,6 @@ class CommentDeleteView(CommentUpdateDeleteMixin,
                         LoginRequiredMixin,
                         DeleteView):
     ...
-
-
-# class PostDetailView(DetailView):
-#     model = Post
-#     template_name = 'blog/detail.html'
-#     paginate_by = POSTS_PER_PAGE
-#     pk_url_kwarg = 'post_id'
-
-#     def get_object(self):
-#         post = get_object_or_404(Post, pk=self.kwargs[self.pk_url_kwarg])
-#         if self.request.user != post.author:
-#             post = get_object_or_404(
-#                 filter_posts(Post.objects),
-#                 pk=self.kwargs[self.pk_url_kwarg],
-#             )
-#         return post
-
-#     def get_context_data(self, **kwargs):
-#         return dict(
-#             **super().get_context_data(**kwargs),
-#             form=CommentForm(),
-#             comments=self.object.comments.select_related('author'),
-#         )
 
 
 class PostUpdateDeleteMixin():

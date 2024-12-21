@@ -5,6 +5,8 @@ __pycache__/
 
 # C extensions
 *.so
+static_dev/
+*.html
 
 # Distribution / packaging
 .Python
@@ -149,4 +151,3 @@ dmypy.json
 media/
 
 sent_emails/
-
