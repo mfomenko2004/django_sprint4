@@ -18,4 +18,4 @@ class ProfileForm(forms.ModelForm):
 class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
-        fields = ('text',)
+        exclude = ('author', 'post', 'created_at',)
