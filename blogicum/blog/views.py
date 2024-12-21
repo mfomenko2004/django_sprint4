@@ -1,4 +1,4 @@
-from django.shortcuts import get_object_or_404, render, redirect
+from django.shortcuts import get_object_or_404, redirect
 from blog.models import Category, Post
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import (
