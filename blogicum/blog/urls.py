@@ -44,7 +44,7 @@ urlpatterns = [
          login_required(views.ProfileUpdateView.as_view()),
          name='edit_profile'),
     path('profile/<str:username>/',
-         login_required(views.ProfileListView.as_view()),
+         views.ProfileListView.as_view(),
          name='profile'),
     path('posts/<int:post_id>/add_comment/',
          login_required(views.CommentCreateView.as_view()),
