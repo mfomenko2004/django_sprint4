@@ -1,3 +1,4 @@
+"""Созданы формы для заполнения/написания профиля, поста и комментария."""
 from django import forms
 
 from .models import Post, User, Comment

@@ -1,3 +1,8 @@
+"""
+Добавлен путь для регистрации.
+Добавлена работа со статикой.
+Добывлены обработчики для кастомных страниц ошибок.
+"""
 """blogicum URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
