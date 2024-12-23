@@ -4,7 +4,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import (
     CreateView, DeleteView, DetailView, ListView, UpdateView
 )
-from django.urls import reverse
+from django.urls import reverse_lazy
 from .forms import PostForm, ProfileForm, CommentForm
 from .models import Comment, User
 from django.utils import timezone
@@ -14,18 +14,34 @@ from django.db.models import Count
 POSTS_PER_PAGE = 10
 
 
-def filter_posts(posts, filter_flag=True):
+def filter_posts(posts=None,
+                 filter_flag=True,
+                 category_flag=None,
+                 author_flag=None):
+    """Фильтрует посты на основе параметров фильтрации."""
+
+    if posts is None:
+        posts = Post.objects.all()
+
     queryset = posts.prefetch_related(
         'comments'
     ).select_related(
         'location', 'category', 'author',
     )
+
     if filter_flag:
         queryset = queryset.filter(
             pub_date__lte=timezone.now(),
             is_published=True,
             category__is_published=True,
         )
+
+    if category_flag:
+        queryset = queryset.filter(category=category_flag)
+
+    if author_flag:
+        queryset = queryset.filter(author=author_flag)
+
     return queryset.annotate(
         comment_count=Count('comments')
     ).order_by(Post._meta.ordering[0])
@@ -70,13 +86,12 @@ class CategoryListView(ListView):
     pk_url_kwarg = 'category_slug'
 
     def get_queryset(self):
-        return filter_posts(
-            get_object_or_404(
-                Category,
-                is_published=True,
-                slug=self.kwargs[self.pk_url_kwarg]
-            ).posts
+        category = get_object_or_404(
+            Category,
+            is_published=True,
+            slug=self.kwargs[self.pk_url_kwarg]
         )
+        return filter_posts(category.posts.all())
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -93,16 +108,16 @@ class CategoryListView(ListView):
 class ProfileListView(ListView):
     model = Post
     template_name = 'blog/profile.html'
-    queryset = Post.objects.all()
     paginate_by = POSTS_PER_PAGE
 
     def get_user(self):
         return get_object_or_404(User, username=self.kwargs['username'])
 
     def get_queryset(self):
+        user = self.get_user()
         return filter_posts(
-            self.get_user().posts,
-            (self.request.user != self.get_user())
+            user.posts.all(),
+            (self.request.user != user)
         )
 
     def get_context_data(self, **kwargs):
@@ -123,7 +138,7 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
         return queryset.get(username=self.request.user.username)
 
     def get_success_url(self):
-        return reverse('blog:index')
+        return reverse_lazy('blog:index')
 
 
 class PostCreateView(LoginRequiredMixin, CreateView):
@@ -136,7 +151,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse(
+        return reverse_lazy(
             'blog:profile', args=[self.request.user.username]
         )
 
@@ -153,7 +168,7 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse('blog:post_detail',
+        return reverse_lazy('blog:post_detail',
                        args=[self.kwargs[self.pk_url_kwarg]])
 
 
@@ -170,7 +185,7 @@ class CommentUpdateDeleteMixin():
         return comment
 
     def get_success_url(self):
-        return reverse('blog:post_detail', args=[self.kwargs['post_id']])
+        return reverse_lazy('blog:post_detail', args=[self.kwargs['post_id']])
 
 
 class CommentUpdateView(CommentUpdateDeleteMixin,
@@ -210,6 +225,6 @@ class PostDeleteView(PostUpdateDeleteMixin, LoginRequiredMixin, DeleteView):
         )
 
     def get_success_url(self):
-        return reverse(
+        return reverse_lazy(
             'blog:profile', args=[self.request.user.username]
         )

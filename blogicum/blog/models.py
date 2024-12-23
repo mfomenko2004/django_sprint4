@@ -64,6 +64,7 @@ class Post(CreatedTimeIsPublishedModel):
         User,
         on_delete=models.CASCADE,
         verbose_name='Автор публикации',
+        related_name='posts'
     )
     location = models.ForeignKey(
         Location,
@@ -77,12 +78,11 @@ class Post(CreatedTimeIsPublishedModel):
         null=True,
         on_delete=models.SET_NULL,
         verbose_name='Категория',
-        # related_name='posts'
+        related_name='posts'
     )
     image = models.ImageField('Фото', upload_to='post_images/', blank=True)
 
     class Meta:
-        default_related_name = 'posts'
         verbose_name = 'публикация'
         verbose_name_plural = 'Публикации'
         ordering = ('-pub_date',)
@@ -109,6 +109,7 @@ class Comment(models.Model):
         Post,
         on_delete=models.CASCADE,
         verbose_name='Номер публикации',
+        related_name='comments'
     )
     created_at = models.DateTimeField(
         'Добавлено',
